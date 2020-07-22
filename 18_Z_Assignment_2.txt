@@ -1,0 +1,80 @@
+Learning Objectives:-
+Create the cron job in the cluster
+Allow the cron job to run successfully
+
+Problem Statement:-
+Your company has a simple data cleanup process that is run periodically for maintenance purposes. They would like to stop doing this manually in order to save time, so you have been asked to implement a cron job in the Kubernetes cluster to run this process. Create a cron job called cleanup-cronjob using the linuxacademycontent/data-cleanup:1 image. Have the job run every minute with the following cron expression: */1 * * * *.
+
+
+
+vi cron-jobs.yml
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cleanup-cronjob
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cleanup-cronjob-ctr
+            image: linuxacademycontent/data-cleanup:1
+          restartPolicy: OnFailure
+
+kubectl create -f cron-jobs.yml
+cronjob.batch/cleanup-cronjob created
+
+
+
+master $ kubectl get cronjobs
+NAME              SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cleanup-cronjob   */1 * * * *   False     1        6s              3m19s
+
+
+kubectl describe cronjobs cleanup-cronjob
+
+master $ kubectl describe cronjobs cleanup-cronjob
+Name:                          cleanup-cronjob
+Namespace:                     default
+Labels:                        <none>
+Annotations:                   <none>
+Schedule:                      */1 * * * *
+Concurrency Policy:            Allow
+Suspend:                       False
+Successful Job History Limit:  3
+Failed Job History Limit:      1
+Starting Deadline Seconds:     <unset>
+Selector:                      <unset>
+Parallelism:                   <unset>
+Completions:                   <unset>
+Pod Template:
+  Labels:  <none>
+  Containers:
+   cleanup-cronjob-ctr:
+    Image:           linuxacademycontent/data-cleanup:1
+    Port:            <none>
+    Host Port:       <none>
+    Environment:     <none>
+    Mounts:          <none>
+  Volumes:           <none>
+Last Schedule Time:  Wed, 22 Jul 2020 13:15:00 +0000
+Active Jobs:         <none>
+Events:
+  Type    Reason            Age    From                Message
+  ----    ------            ----   ----                -------
+  Normal  SuccessfulCreate  4m34s  cronjob-controller  Created job cleanup-cronjob-1595423460
+  Normal  SawCompletedJob   4m23s  cronjob-controller  Saw completed job: cleanup-cronjob-1595423460, status: Complete
+  Normal  SuccessfulCreate  3m33s  cronjob-controller  Created job cleanup-cronjob-1595423520
+  Normal  SawCompletedJob   3m23s  cronjob-controller  Saw completed job: cleanup-cronjob-1595423520, status: Complete
+  Normal  SuccessfulCreate  2m33s  cronjob-controller  Created job cleanup-cronjob-1595423580
+  Normal  SawCompletedJob   2m23s  cronjob-controller  Saw completed job: cleanup-cronjob-1595423580, status: Complete
+  Normal  SuccessfulCreate  93s    cronjob-controller  Created job cleanup-cronjob-1595423640
+  Normal  SawCompletedJob   83s    cronjob-controller  Saw completed job: cleanup-cronjob-1595423640, status: Complete
+  Normal  SuccessfulDelete  83s    cronjob-controller  Deleted job cleanup-cronjob-1595423460
+  Normal  SuccessfulCreate  33s    cronjob-controller  Created job cleanup-cronjob-1595423700
+  Normal  SawCompletedJob   23s    cronjob-controller  Saw completed job: cleanup-cronjob-1595423700, status: Complete
+  Normal  SuccessfulDelete  23s    cronjob-controller  Deleted job cleanup-cronjob-1595423520
+
